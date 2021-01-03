@@ -33,6 +33,7 @@ class MapAreaOptions extends JPanel {
 		this.add(new MapAreaElementCheckBox("Robot", MapAreaElementEnum.ROBOT));
 		this.add(new MapAreaElementCheckBox("Infrared scanner", MapAreaElementEnum.INFRARED_SCANNER));
 		this.add(new MapAreaElementCheckBox("Ultrasonic scanner", MapAreaElementEnum.ULTRASONIC_SCANNER));
+		this.add(new MapAreaElementCheckBox("LIDAR", MapAreaElementEnum.LASER_SCANNER));
 		this.add(new MapAreaElementCheckBox("Map", MapAreaElementEnum.MAP));
 		this.add(new MapAreaElementCheckBox("Landmarks", MapAreaElementEnum.LANDMARKS));		
 		

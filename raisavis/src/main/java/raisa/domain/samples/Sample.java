@@ -1,6 +1,8 @@
 package raisa.domain.samples;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -31,6 +33,7 @@ public class Sample {
 	private int messageNumber;
 	private BufferedImage image;
 	private byte[] imageBytes;
+	private List<LidarScanValue> lidarScanValues = new ArrayList<>();
 	
 	public Sample() {
 
@@ -59,6 +62,7 @@ public class Sample {
 		this.timestampMillis = copy.timestampMillis;
 		this.messageNumber = copy.messageNumber;
 		this.image = copy.image;
+		this.lidarScanValues = copy.lidarScanValues;
 	}
 	
 
@@ -261,7 +265,15 @@ public class Sample {
 	public byte[] getImageBytes() {
 		return this.imageBytes;
 	}
+
+	public void addLidarScanValue(LidarScanValue lidarScanValue) {
+		this.lidarScanValues.add(lidarScanValue);
+	}
 	
+	public List<LidarScanValue> getLidarScanValues() {
+		return this.lidarScanValues;
+	}
+
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this)
 				.append("infrared2MeasurementValid", infrared2MeasurementValid)
@@ -270,4 +282,27 @@ public class Sample {
 		return builder.toString();
 	}
 	
+	public static class LidarScanValue {
+		private float angle;
+		private int distance;
+		private int intensity;
+
+		public LidarScanValue(float angle, int distance, int intensity) {
+			this.angle = angle;
+			this.distance = distance;
+			this.intensity = intensity;
+		}
+
+		public float getAngle() {
+			return angle;
+		}
+
+		public int getDistance() {
+			return distance;
+		}
+
+		public int getIntensity() {
+			return intensity;
+		}
+	}
 }

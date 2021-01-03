@@ -44,6 +44,7 @@ import raisa.domain.robot.Robot;
 import raisa.domain.robot.RobotState;
 import raisa.domain.samples.Sample;
 import raisa.domain.samples.SampleListener;
+import raisa.domain.samples.Sample.LidarScanValue;
 import raisa.simulator.RobotSimulator;
 import raisa.util.CollectionUtil;
 import raisa.util.GeometryUtil;
@@ -68,6 +69,7 @@ public class VisualizerPanel extends JPanel implements SampleListener, Visualize
 	private float scale = 1.0f;
 	private List<Sample> latestIR = new ArrayList<Sample>();
 	private List<Sample> latestSR = new ArrayList<Sample>();
+	private Sample latestLI = null;
 	private final Stroke dashed;
 	private final Stroke arrow;
 	private final VisualizerFrame visualizerFrame;
@@ -144,6 +146,9 @@ public class VisualizerPanel extends JPanel implements SampleListener, Visualize
 		if (sample.getImage() != null) {
 			currentImage = sample.getImage();
 		}
+		if (!sample.getLidarScanValues().isEmpty()) {
+			latestLI = sample;
+		}
 		repaint();
 	}
 
@@ -177,6 +182,9 @@ public class VisualizerPanel extends JPanel implements SampleListener, Visualize
 		}
 		if(mapAreaElements.contains(MapAreaElementEnum.INFRARED_SCANNER)) {
 			drawIrResults(g2);
+		}
+		if(mapAreaElements.contains(MapAreaElementEnum.LASER_SCANNER)) {
+			drawLIResults(g2);
 		}
 		Vector2D worldMouse = toWorld(mouse);
 		if (mouseDragging) {
@@ -466,6 +474,18 @@ public class VisualizerPanel extends JPanel implements SampleListener, Visualize
 		}
 		g.setColor(new Color(0.0f, 0.6f, 0.6f, sr));
 		drawPoint(g, spot);
+	}
+
+	private void drawLIResults(Graphics2D g2) {
+		RobotState robot = worldModel.getLatestState().getEstimatedState();
+		if (latestLI != null) {
+			for (LidarScanValue scanValue : latestLI.getLidarScanValues()) {
+				g2.setColor(measurementColor);
+				Vector2D spot = GeometryUtil.calculatePosition(robot.getPosition(), robot.getHeading() + scanValue.getAngle(), scanValue.getDistance());
+				drawMeasurementLine(g2, robot.getPosition(), spot);
+				drawPoint(g2, spot);
+			}
+		}
 	}
 
 	private void drawRobotSimulator(Graphics2D g2) {

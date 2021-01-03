@@ -1,5 +1,7 @@
 package raisa.comms;
 
+import static java.lang.Integer.parseInt;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -10,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import raisa.domain.samples.Sample;
+import raisa.domain.samples.Sample.LidarScanValue;
 import raisa.util.HexToBinaryUtil;
 
 public class SampleParser {
@@ -167,6 +170,11 @@ public class SampleParser {
 					} catch(IOException iex) {
 						log.error("Failed to parse image", iex);
 					}
+				} else if (part.startsWith("LI")) {
+					String[] scan = value.split("_");
+					if (scan.length == 3) {
+						sample.addLidarScanValue(new LidarScanValue((float)Math.toRadians(parseInt(scan[0])), parseInt(scan[1]), parseInt(scan[2])));
+					}
 				} else {
 				}
 			}
@@ -191,7 +199,7 @@ public class SampleParser {
 	}
 
 	public boolean isValid(String sample) {
-		return sample.matches("STA;([A-Z][A-Za-z]+[-]?[0-9]*\\.?[0-9]+;)*(CA[A-F0-9]*;)*END;[\n\r]*");
+		return sample.matches("STA;([A-Z][A-Za-z]+[-]?[0-9_]*\\.?[0-9]+;)*(CA[A-F0-9]*;)*END;[\n\r]*");
 	}
 	
 	public boolean mayContainImage(String sample) {
