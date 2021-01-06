@@ -16,13 +16,19 @@ public class SimpleRobotMovementEstimator implements RobotMovementEstimator {
 	@Override
 	public RobotState moveRobot(RobotState state, Sample sample) {
 		RobotState robot = new RobotState();
+		float leftTrackTrip;
+		float rightTrackTrip;
 		if (state == null) {
 			return robot;
-		} else if (sample.getLeftTrackTicks() == 0 && sample.getRightTrackTicks() == 0) {
+		} else if (sample.getLeftTrackTicks() != 0 || sample.getRightTrackTicks() != 0) {
+			leftTrackTrip = (Robot.WHEEL_DIAMETER * sample.getLeftTrackTicks() * Robot.TICK_RADIANS) / 2.0f;
+			rightTrackTrip = (Robot.WHEEL_DIAMETER * sample.getRightTrackTicks() * Robot.TICK_RADIANS) / 2.0f;
+		} else if (sample.getLeftWheelOdometer() != 0 || sample.getRightWheelOdometer() != 0) {
+			leftTrackTrip = (float)(sample.getLeftWheelOdometer() / 10.0);
+			rightTrackTrip = (float)(sample.getRightWheelOdometer() / 10.0);
+		} else {
 			return state;
 		}
-		float leftTrackTrip = (Robot.WHEEL_DIAMETER * sample.getLeftTrackTicks() * Robot.TICK_RADIANS) / 2.0f;
-		float rightTrackTrip = (Robot.WHEEL_DIAMETER * sample.getRightTrackTicks() * Robot.TICK_RADIANS) / 2.0f;
 
 		float h = state.getHeading();
 		Vector2D positionLeftTrack = new Vector2D(state.getPositionLeftTrack().x + leftTrackTrip * (float) Math.sin(h),

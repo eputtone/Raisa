@@ -28,6 +28,8 @@ public class Sample {
 	private Vector3D gyro = new Vector3D();
 	private int leftTrackTicks;
 	private int rightTrackTicks;
+	private int leftWheelOdometer;
+	private int rightWheelOdometer;
 	private int soundIntensity;
 	private long timestampMillis;
 	private int messageNumber;
@@ -63,6 +65,8 @@ public class Sample {
 		this.messageNumber = copy.messageNumber;
 		this.image = copy.image;
 		this.lidarScanValues = copy.lidarScanValues;
+		this.leftWheelOdometer = copy.leftWheelOdometer;
+		this.rightWheelOdometer = copy.rightWheelOdometer;
 	}
 	
 
@@ -138,6 +142,14 @@ public class Sample {
 		rightTrackTicks = ticks;
 	}
 
+	public void setLeftWheelOdometer(int v) {
+		leftWheelOdometer = v;
+	}
+
+	public void setRightWheelOdometer(int v) {
+		rightWheelOdometer = v;
+	}
+	
 	public void setSoundIntensity(int intensity) {
 		soundIntensity = intensity;
 	}	
@@ -180,6 +192,14 @@ public class Sample {
 
 	public int getRightTrackTicks() {
 		return rightTrackTicks;
+	}
+
+	public int getLeftWheelOdometer() {
+		return leftWheelOdometer;
+	}
+
+	public int getRightWheelOdometer() {
+		return rightWheelOdometer;
 	}
 
 	public boolean isInfrared1MeasurementValid() {

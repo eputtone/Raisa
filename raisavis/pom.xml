@@ -25,6 +25,7 @@
 		<maven-findbugs.version>2.5.3</maven-findbugs.version>
 		<jdk.version>1.7</jdk.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<purejavahidapi.version>0.0.3</purejavahidapi.version>
 		<rxtx.version>2.1.7</rxtx.version>
 		<slf4j.version>1.7.7</slf4j.version>
 	</properties>
@@ -84,6 +85,11 @@
 			<groupId>com.codeminders</groupId>
 			<artifactId>hidapi</artifactId>
 			<version>${hidapi.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.vveird</groupId>
+			<artifactId>purejavahidapi</artifactId>
+			<version>${purejavahidapi.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>

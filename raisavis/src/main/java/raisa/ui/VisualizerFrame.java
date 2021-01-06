@@ -38,6 +38,7 @@ import raisa.comms.controller.BasicController;
 import raisa.comms.controller.PidController;
 import raisa.comms.controller.ReplayController;
 import raisa.comms.serial.JserialSerialCommunicator;
+import raisa.comms.serial.NeatoSerialCommunicator;
 import raisa.config.VisualizerConfig;
 import raisa.domain.WorldModel;
 import raisa.domain.particlefilter.ParticleFilter;
@@ -105,7 +106,10 @@ public class VisualizerFrame extends JFrame {
 
 		sessionWriter = new SessionWriter(sessionDirectory, "data");
 
-		communicator = new FailoverCommunicator(new JserialSerialCommunicator().addSensorListener(worldModel), sessionWriter);
+		communicator = new FailoverCommunicator(
+			new JserialSerialCommunicator().addSensorListener(worldModel),
+			new NeatoSerialCommunicator().addSensorListener(worldModel),
+			sessionWriter);
 		communicator.connect();
 
 		fileBasedSimulation = new FileBasedSimulation(worldModel);

@@ -26,7 +26,7 @@ public abstract class AbstractSerialCommunicator implements Communicator {
 	};
 
 	private String unfinishedSample = "";
-	private final List<SensorListener> sensorListeners = new ArrayList<SensorListener>();
+	protected final List<SensorListener> sensorListeners = new ArrayList<SensorListener>();
 	private final SampleParser parser = new SampleParser();
 	protected boolean active = false;
 	/** Buffered input stream from the port */

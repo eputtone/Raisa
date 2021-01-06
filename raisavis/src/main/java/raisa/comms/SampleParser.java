@@ -175,6 +175,12 @@ public class SampleParser {
 					if (scan.length == 3) {
 						sample.addLidarScanValue(new LidarScanValue((float)Math.toRadians(parseInt(scan[0])), parseInt(scan[1]), parseInt(scan[2])));
 					}
+				} else if (part.startsWith("OR")) {
+					int odo = Integer.parseInt(value);
+					sample.setRightWheelOdometer(odo);
+				} else if (part.startsWith("OL")) {
+					int odo = Integer.parseInt(value);
+ 					sample.setLeftWheelOdometer(odo);
 				} else {
 				}
 			}
@@ -199,7 +205,7 @@ public class SampleParser {
 	}
 
 	public boolean isValid(String sample) {
-		return sample.matches("STA;([A-Z][A-Za-z]+[-]?[0-9_]*\\.?[0-9]+;)*(CA[A-F0-9]*;)*END;[\n\r]*");
+		return sample.matches("STA;([A-Z][A-Za-z]+[-]?[0-9\\_]*\\.?[0-9]+;)*(CA[A-F0-9]*;)*END;[\n\r]*");
 	}
 	
 	public boolean mayContainImage(String sample) {

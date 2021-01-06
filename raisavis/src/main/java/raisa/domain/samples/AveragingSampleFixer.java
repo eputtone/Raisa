@@ -3,6 +3,7 @@ package raisa.domain.samples;
 import java.util.ArrayList;
 import java.util.List;
 
+import raisa.config.VisualizerConfig;
 import raisa.util.CollectionUtil;
 
 public class AveragingSampleFixer implements SampleFixer {
@@ -23,6 +24,9 @@ public class AveragingSampleFixer implements SampleFixer {
 	
 	@Override
 	public Sample fix(Sample sample) {
+		if (!VisualizerConfig.getInstance().getUseCompass()) {
+			return sample;
+		}
 		Sample fixedSample = new Sample(sample);
 
 		if (lastSamples.isEmpty()) {

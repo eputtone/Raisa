@@ -155,7 +155,7 @@ public class Visualizer {
 
 			frame.open();
 	    } catch (RuntimeException pex) {
-	        System.err.println( "Parsing failed.  Reason: " + pex.getMessage() );
+			log.error("Parsing failed.", pex);
 	    	HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp( "Visualizer", options );
 			System.exit(0);

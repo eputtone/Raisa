@@ -27,8 +27,9 @@ public class JserialSerialCommunicator extends AbstractSerialCommunicator implem
 
 		// iterate through, looking for the port
 		for (SerialPort commPort : commPorts) {
+			System.out.println(commPort.getDescriptivePortName());
 			for (String portName : PORT_NAMES) {
-				if (commPort.getSystemPortName().equals(portName)) {
+				if (commPort.getSystemPortName().equals(portName) && !commPort.getDescriptivePortName().contains("Neato")) {
 					serialPort = commPort;
 					break;
 				}

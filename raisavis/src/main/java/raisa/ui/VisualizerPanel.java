@@ -146,7 +146,13 @@ public class VisualizerPanel extends JPanel implements SampleListener, Visualize
 		if (sample.getImage() != null) {
 			currentImage = sample.getImage();
 		}
-		if (!sample.getLidarScanValues().isEmpty()) {
+		if (!sample.getLidarScanValues().isEmpty()) {			
+			for (LidarScanValue scan : sample.getLidarScanValues()) {
+				if (scan.getDistance() > 10 && scan.getDistance() < 500) {
+					Vector2D spotPosition = GeometryUtil.calculatePosition(latestState.getPosition(), latestState.getHeading() + scan.getAngle(), scan.getDistance());
+					worldModel.setGridPosition(spotPosition, true);
+				}
+			}
 			latestLI = sample;
 		}
 		repaint();
@@ -479,10 +485,11 @@ public class VisualizerPanel extends JPanel implements SampleListener, Visualize
 	private void drawLIResults(Graphics2D g2) {
 		RobotState robot = worldModel.getLatestState().getEstimatedState();
 		if (latestLI != null) {
+			int count = 0;
 			for (LidarScanValue scanValue : latestLI.getLidarScanValues()) {
 				g2.setColor(measurementColor);
 				Vector2D spot = GeometryUtil.calculatePosition(robot.getPosition(), robot.getHeading() + scanValue.getAngle(), scanValue.getDistance());
-				drawMeasurementLine(g2, robot.getPosition(), spot);
+				drawMeasurementLine(g2, robot.getPosition(), spot, count++ % 10 == 0);
 				drawPoint(g2, spot);
 			}
 		}

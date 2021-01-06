@@ -5,12 +5,25 @@ import static raisa.ui.controls.sixaxis.SixaxisInput.PayloadField.DIRECTION_PAD;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.AbstractButton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import purejavahidapi.HidDeviceInfo;
+import purejavahidapi.InputReportListener;
+import purejavahidapi.PureJavaHidApi;
+import purejavahidapi.HidDevice;
 
 import com.codeminders.hidapi.HIDDevice;
 import com.codeminders.hidapi.HIDManager;
@@ -37,14 +50,14 @@ public class SixaxisInput {
 		if (instance == null) {
 			synchronized(SixaxisInput.class) {
 				if (instance == null) {
-					try {
+					/*try {
 				        System.loadLibrary("hidapi-jni");
 				        nativeLibLoaded = true;
 				    } catch(UnsatisfiedLinkError uex) {
 				    	log.info("Failed to find hidapi-jni library for sixaxis");
 				    } catch(Exception ex) {
 				    	log.info("Failed to load library hidapi-jni", ex);
-				    }
+				    }*/
 					instance = new SixaxisInput();
 				}
 			}
@@ -107,21 +120,18 @@ public class SixaxisInput {
 	}
 
 	public void activate() {
-		if (!nativeLibLoaded) {
-			return;
-		}
 		try {
 			deviceReader = new SixaxisDeviceReader(this);
-			deviceReaderThread = new Thread(deviceReader, "raisavis-SixaxisInput");
-			deviceReaderThread.start();
+			//deviceReaderThread = new Thread(deviceReader, "raisavis-SixaxisInput");
+			//deviceReaderThread.start();
 			log.info("Sixaxis controller activated");
 		} catch(IOException iox) {
-			log.info("Sixaxis controller not detected");
+			log.info("Sixaxis controller not detected", iox);
 		}
 	}
 
 	public void passivate() {
-		deviceReader.stop();
+		//eviceReader.stop();
 	}
 
 	public void registerMovementButtons(AbstractButton up,
@@ -153,7 +163,7 @@ public class SixaxisInput {
 		doClick(movementButtons.get(directionPadLookup.get(Integer.valueOf(buf[DIRECTION_PAD.getFieldNo()]))));
 		doClick(actionButtons.get(buttonPadLookup.get(Integer.valueOf(buf[BUTTON_PAD.getFieldNo()]))));
 
-		// crappy handling for pan & tilt servos below
+		// crappy handling for pan & tilt servos below		
 		int joystickRightX = buf[PayloadField.JOYSTICK_RIGHT_X.getFieldNo()];
 		if (joystickRightX < 100) {
 			doClick(panAndTiltButtons.get("LEFT"));
@@ -170,27 +180,75 @@ public class SixaxisInput {
 
 	private void doClick(AbstractButton button) {
 		if (button != null) {
-			button.doClick();
+			button.doClick();	
+			System.out.println("clik")		;
 		}
 	}
 
-	class SixaxisDeviceReader implements Runnable {
+	class SixaxisDeviceReader { //implements Runnable {
 		private static final int VENDOR_ID = 1356;
 		private static final int PRODUCT_ID = 616;
 		private static final long READ_UPDATE_DELAY_MS = 150L;
 		private static final int INPUT_BUFFER_LENGTH = 64;
 
-		private boolean running = false;
-		private final HIDDevice dev;
-		private final HIDManager hidMgr;
-		private final SixaxisInput input;
+		//private final HIDDevice dev;
+		//private final HIDManager hidMgr;
+		private final SixaxisInput sixAxisInput;
+		private HidDeviceInfo devInfo;
+		private HidDevice dev;
 
 		public SixaxisDeviceReader(SixaxisInput input) throws IOException {
-			hidMgr = HIDManager.getInstance();
-			dev = hidMgr.openById(VENDOR_ID, PRODUCT_ID, null);
-			this.input = input;
-		}
+			//hidMgr = HIDManager.getInstance();
+			List<HidDeviceInfo> devList = PureJavaHidApi.enumerateDevices();
+			for (HidDeviceInfo info : devList) {
+				if (info.getVendorId() == VENDOR_ID && info.getProductId() == PRODUCT_ID) {
+					devInfo = info;
+					break;
+				}
+			}
+			this.sixAxisInput = input;
+			if (devInfo == null) {
+				return;
+			}
+			dev = PureJavaHidApi.openDevice(devInfo);
+			
+			dev.setInputReportListener(new InputReportListener() {
+				ExecutorService t = Executors.newSingleThreadExecutor();
+				final AtomicBoolean running = new AtomicBoolean(false);
 
+				@Override
+				public synchronized void onInputReport(HidDevice source, byte Id, final byte[] data, final int len) {
+					//System.out.printf("onInputReport: id %d len %d data ", Id, len);
+					//for (int i = 0; i < len; i++)
+					//	System.out.printf("%02X ", data[i]);
+					//System.out.println();
+					if (running.compareAndSet(false, true)) {
+						t.submit(new Runnable() {
+							@Override
+							public void run() {
+								try {							
+									int[] intBuf = new int[len+1];
+									for (int i=1; i<len; i++) {
+										intBuf[i] = (data[i-1]<0) ? data[i-1] + 256 : data[i-1];
+									}				
+									sixAxisInput.handleInput(intBuf);
+									try {
+										Thread.sleep(READ_UPDATE_DELAY_MS);
+									} catch (InterruptedException e) {
+										// Ignore
+									}				
+								} finally {
+									running.set(false);
+								}
+							}
+						});
+					}
+				}
+			});
+			
+			//dev = hidMgr.openById(VENDOR_ID, PRODUCT_ID, null);
+		}
+/*
 		public void stop() {
 			running = false;
 		}
@@ -227,7 +285,7 @@ public class SixaxisInput {
 				//System.gc();
 			}
 		}
-
+*/
 	}
 
 //	private void printPayload(byte[] buf, int n) {

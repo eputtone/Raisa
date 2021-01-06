@@ -48,6 +48,7 @@ public class VisualizerConfig {
 		this.displayedMapAreaElements.add(MapAreaElementEnum.PARTICLES);
 		this.displayedMapAreaElements.add(MapAreaElementEnum.ULTRASONIC_SCANNER);
 		this.displayedMapAreaElements.add(MapAreaElementEnum.INFRARED_SCANNER);
+		this.displayedMapAreaElements.add(MapAreaElementEnum.LASER_SCANNER);
 
 		this.displayedMeasurements.add(MeasurementTypeEnum.HEADING);
 		this.displayedMeasurements.add(MeasurementTypeEnum.SPEED);
