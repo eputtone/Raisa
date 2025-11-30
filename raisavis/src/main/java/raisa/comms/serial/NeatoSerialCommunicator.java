@@ -1,5 +1,6 @@
 package raisa.comms.serial;
 
+import static java.lang.Math.abs;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import raisa.comms.CameraResolution;
 import raisa.comms.ControlMessage;
 import raisa.comms.SensorListener;
 
@@ -49,7 +51,9 @@ public class NeatoSerialCommunicator extends AbstractSerialCommunicator {
                                 sensorListener.sampleReceived(sb);
                             }
                             if (commands.peekLast() != null) {
-                                output.write(commands.removeLast());
+                                byte[] msg = commands.removeLast();
+                                log.info("Sending msg: {}", new String(msg, UTF_8));
+                                output.write(msg);
                             } else {
                                 output.write("X".getBytes());
                             }
@@ -93,15 +97,30 @@ public class NeatoSerialCommunicator extends AbstractSerialCommunicator {
         if (!active) {
             return;
         }
-        /*
-         * if (output != null) { synchronized(output) { try { String msg = "m "
-         * + (controlMessage.getLeftSpeed() * 1000) + " " + 
-         * (controlMessage.getRightSpeed() * 1000) + " 200"; if
-         * (controlMessage.getLeftSpeed() == 0 && controlMessage.getRightSpeed()
-         * == 0) { msg = "m 1 1 1"; } log.info("Sending message {}" + msg);
-         * output.write(msg); output.flush(); } catch (Exception ex) {
-         * log.error("Failed to send control message", ex); } } }
-         */
+        if (!controlMessage.isRawValues()) {
+            int[] speedPowerMap = ControlMessage.getSpeedPowerMap();
+            controlMessage = new ControlMessage(
+                    speedPowerMap[abs(controlMessage.getLeftSpeed())] * (controlMessage.getLeftSpeed() > 0 ? 1 : -1),
+                    speedPowerMap[abs(controlMessage.getRightSpeed())] * (controlMessage.getRightSpeed() > 0 ? 1 : -1),
+                    controlMessage.isLights(),
+                    controlMessage.getPanServoAngle(),
+                    controlMessage.getTiltServoAngle(),
+                    false,
+                    controlMessage.isServos(),
+                    CameraResolution.NOCHANGE,
+                    true);
+        } else {
+            controlMessage = new ControlMessage(
+                    (int)(controlMessage.getLeftSpeed() / 4.0),
+                    (int)(controlMessage.getRightSpeed() / 4.0),
+                    controlMessage.isLights(),
+                    controlMessage.getPanServoAngle(),
+                    controlMessage.getTiltServoAngle(),
+                    false,
+                    controlMessage.isServos(),
+                    CameraResolution.NOCHANGE,
+                    true);
+        }
         commands.addFirst(controlMessage.toJson().getBytes(UTF_8));
 	}
 }

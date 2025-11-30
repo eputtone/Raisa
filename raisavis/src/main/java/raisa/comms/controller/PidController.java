@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import raisa.comms.CameraResolution;
 import raisa.comms.Communicator;
 import raisa.comms.ControlMessage;
@@ -19,6 +22,8 @@ import raisa.util.GeometryUtil;
 import raisa.util.Vector2D;
 
 public class PidController extends Controller implements RobotStateListener {
+
+	private static final Logger log = LoggerFactory.getLogger(PidController.class);
 
 	private static final float HALF_PI = (float)(Math.PI / 2.0d);
 
@@ -102,8 +107,7 @@ public class PidController extends Controller implements RobotStateListener {
 
 	@Override
 	public void robotStateChanged(Robot newRobot) {
-		if (ControllerTypeEnum.PID_CONTROLLER != VisualizerConfig.getInstance().getControllerType() ||
-				stateCounter++ % 5 != 0) {
+		if (ControllerTypeEnum.PID_CONTROLLER != VisualizerConfig.getInstance().getControllerType()) {
 			return;
 		}
 		RobotState robotState = newRobot.getMeasuredState();
@@ -113,6 +117,7 @@ public class PidController extends Controller implements RobotStateListener {
 			rightSpeed = 0;
 			accError = 0.0f;
 			prevError = 0.0f;
+			log.info("Stopping robot");
 			sendPackage();
 			return;
 		}
